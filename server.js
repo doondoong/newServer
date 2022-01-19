@@ -42,7 +42,7 @@ server.post('/register', (req,res) => {
     //회원 가입 
     //bodyParser로 가져온 req.body
     const user = new User(req.body)
-    //이건 몽구스 함수
+    //이건 몽구스 함수(저장)
     user.save((err, userInfo) => {
         if(err) return res.json({ success: false, err})
         //200은 성공코드
@@ -50,7 +50,6 @@ server.post('/register', (req,res) => {
             success: true
         })
     })
-
 })
 
 
