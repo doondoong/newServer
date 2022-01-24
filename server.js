@@ -4,6 +4,7 @@ const server = express();
 const User = require('./models/User')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
+const {auth} = require('./middleware/auth')
 //.env 파일에서 직접 path값을 받아오기 {아래의 코드를 사용한다면 process.env.MONGODB_URL 로 사용, variables.env파일 참조}
 // require('dotenv').config({ path: 'variables.env' })
 
@@ -39,7 +40,7 @@ server.get('/',(req,res)=>{
     //     })
 })
 
-server.post('/register', (req,res) => {
+server.post('/api/user/register', (req,res) => {
     //회원 가입 
     //bodyParser로 가져온 req.body
     const user = new User(req.body)
@@ -53,7 +54,7 @@ server.post('/register', (req,res) => {
     })
 })
 
-server.post('/login', (req,res) => {
+server.post('/api/user/login', (req,res) => {
     // 요청된 이메일이 데이터 베이스에 있는지 확인 (findOne은 몽고DB함수)
     User.findOne({ email: req.body.email }, (err, user) => {
         if(!user) {
@@ -81,6 +82,22 @@ server.post('/login', (req,res) => {
         })
     })
 })
+
+// 미들웨어 auth 추가 //서버 요청전에 처리해줄 내용
+server.get('/api/user/auth', auth ,(req,res)=>{
+
+    // 여기까지 왔다는 것은 Authentication이 true라는 것
+    res.status(200).json({
+        _id: req.user._id,
+        isAdmin: req.user.role === 1 ? true : false,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        role: req.user.role,
+        image: req.user.image,
+    })
+})
+
 
 server.listen(3000,(err)=>{
     if(err) {
