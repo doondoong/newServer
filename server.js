@@ -22,7 +22,8 @@ server.use(bodyParser.json())
 server.use(cookieParser())
 
 server.get('/',(req,res)=>{
-    res.send("<h1>Hello from<h1>\n<h2>ㅎㅎ<h2>")
+    res.redirect('https://mrlogin.io/auth/kakao/handler')
+    // res.sendFile(__dirname + '/index.html')
     // const newUser = new User();
     // newUser.email = 'pztdrd1@naver.com'
     // newUser.name = '김구구'
@@ -45,7 +46,7 @@ server.post('/api/user/register', (req,res) => {
     //bodyParser로 가져온 req.body
     const user = new User(req.body)
     //이건 몽구스 함수(저장)
-    user.save((err, userInfo) => {
+    user.save(( err, userInfo) => {
         if(err) return res.json({ success: false, err})
         //200은 성공코드
         return res.status(200).json({
@@ -70,10 +71,10 @@ server.post('/api/user/login', (req,res) => {
             return res.json({ loginSuccess: false, message: '비밀번호가 틀렸습니다.'});
         
             // 비밀번호까지 맞다면, 토큰을 생성하기
-
-        user.generateToken((err, user) => {
+            
+        user.generateToken((err, user, to1) => {
             if(err) return res.status(400).send(err);
-
+            if(to1 === 2) return res.status(400).json({ message: '됐다'})
             // 토큰을 저장한다. (쿠키, 로컬스토리지, 세션 등...) 일단 쿠키에 저장 , 쿠키파서 설치
             res.cookie('x_auth',user.token)
             .status(200)
@@ -87,6 +88,7 @@ server.post('/api/user/login', (req,res) => {
 server.get('/api/user/auth', auth ,(req,res)=>{
 
     // 여기까지 왔다는 것은 Authentication이 true라는 것
+    // 미들웨어에서 req로 user와 token을 전달함
     res.status(200).json({
         _id: req.user._id,
         isAdmin: req.user.role === 1 ? true : false,

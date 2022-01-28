@@ -46,7 +46,13 @@ const userSchema = new Schema({
     },
     tokenExp: {
         type: Number,
-    }
+    },
+    to1:
+    {
+        type: Number,
+        default: 2
+    },
+    
 }, {
     timestamps: true
 })
@@ -85,13 +91,16 @@ userSchema.methods.comparePassword = function(plainPassword, cb) {
 }
 
 userSchema.methods.generateToken = function(cb) {
+
     //jwt 토큰 생성
     var user = this;
+    const to1 = user?.to1
     var token = jwt.sign(user._id.toHexString(),'secretToken')
     user.token = token
-    user.save(function(err,user){
+    user.save(function(err, user, to1){
+        console.log(user,'gg')
         if(err) return cb(err)
-        cb(null, user)
+        cb(null, user, to1)
     })
 }
 
